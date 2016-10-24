@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+  <!--
+  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  -->
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>הָמַאֲחָד</title>
+    <script id="jsonld" type="application/ld+json">{"@context": "http://schema.org", "@type": "WebSite"}</script>
+    <link rel="shortcut icon" href="./logo.ico" />
+    <script>
+      var theGoddamnName = 'הָטְרָפֶּזִי';
+      var getNavLocationFromHash = function(hash){
+        var splitedHash = hash.split(';');
+        var newspaper = (splitedHash.length>0)?splitedHash[0]:null;
+        var article = (splitedHash.length>1)?splitedHash[1]:null;
+        var newspaperNumber = (newspaper!==null && newspaper.split(':').length>1)?parseInt(newspaper.split(':')[1]):null;
+        var isNewspaperChoice = false;
+        var isArticleChoice = false;
+        var isArticle = false;
+        if(newspaperNumber===null || typeof(newspaperNumber)!=='number' || newspaperNumber!==newspaperNumber){
+          isNewspaperChoice = true;
+        }else{
+          var articleNumber = (article!==null && article.split(':').length>1)?parseInt(article.split(':')[1]):null;
+          if(articleNumber===null || typeof(articleNumber)!=='number' || articleNumber!==articleNumber){
+            isArticleChoice = true;
+          }else{
+            isArticle = true;
+          }
+        }
+        return {'newspaper':(isNewspaperChoice)?NaN:newspaperNumber,'article':(isArticle)?articleNumber:NaN};
+      };
+      var callRenderFunction = function(){
+        var navLoc = getNavLocationFromHash(location.hash);
+        if(navLoc.article!==navLoc.article&&navLoc.newspaper!==navLoc.newspaper){
+          drawNewspaperChoice();
+        }else{
+          if(navLoc.article!==navLoc.article){
+            drawArticleChoice(navLoc.newspaper);
+          }else{
+            drawArticle(navLoc.newspaper,navLoc.article);
+          }
+        }
+      };
+    </script>
+    <link href="https://fonts.googleapis.com/css?family=Alef|Secular+One&subset=hebrew" rel="stylesheet" />
+    <script src="./newspaperdata.js"></script>
+    <style>
+      body{
+        font-family:'Secular One','Alef Hebrew','Alef',Alef,FrankRuehl,Georgia,serif;
+        text-align: center;
+        direction: rtl;
+        margin:0px;
+      }
+      .container {
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+      }
+      .view {
+        width: 100%;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        will-change: transform;
+        transition: -webkit-transform 0.3s cubic-bezier(0, 1, 1, 1)/*cubic-bezier(0.465, 0.183, 0.153, 0.946)*/;
+        transition: transform 0.3s cubic-bezier(0, 1, 1, 1)/*cubic-bezier(0.465, 0.183, 0.153, 0.946)*/;
+        -webkit-transform: translateX(0);
+        transform: translateX(0);
+        overflow-y:auto;
+        display:block;
+      }
+      .view.off-screen-high{
+        -webkit-transform: translateX(100%);
+         transform: translateX(100%);
+      }
+      .view.off-screen-low{
+        -webkit-transform: translateX(-100%);
+         transform: translateX(-100%);
+      }
+      .view::-webkit-scrollbar{
+        width: 0.5em;
+      }
+      .view::-webkit-scrollbar-thumb{
+        background-color:#edd145;
+      }
+      .view::-webkit-scrollbar-track{
+        background-color:#563ca3;
+      }
+      h1{
+        font-size:32px;
+        font-weight: 100;
+        margin-bottom:0.2em;
+      }
+      #newspaperChoice h1::before{
+        content:'---';
+        color:transparent;
+        width:3em;
+        height:3em;
+        background-image:url('./logos/logo72.png');
+        background-size:cover;
+      }
+      #newspaperList {
+        margin:0px;
+        padding:0px;
+      }
+      #newspaperList a{
+        list-style-type: none;
+        padding:32px;
+      }
+      #newspaperList a:nth-child(even){
+        background-color:#563ca3;
+        color:white;
+      }
+      #newspaperList a:nth-child(odd){
+        background-color:#edd145;
+        color:black;
+      }
+      #newspaperList a:hover, #newspaperList a:focus{
+        background-color:white;
+        color:blue;
+      }
+      #articleGrid{
+          display:flex;
+          flex-wrap:wrap;
+      }
+      #articleGrid a{
+        min-width:200px;
+        padding:40px 25px;
+        flex-grow:1;
+      }
+      #articleGrid a:hover, #articleGrid a:focus{
+        background-color:white !important;
+        color:blue !important;
+      }
+      #articleGrid a p{
+        font-family:'Alef Hebrew','Alef',Alef,Georgia,David,serif;
+      }
+      #articleGrid a span{
+        font-size:1.2em;
+      }
+      .gridBackButton{
+        background-color:black;
+        color:white !important;
+      }
+      .author{
+        text-align:center;
+        font-family:'Alef Hebrew','Alef',Alef,FrankRuehl,Georgia,serif;
+        font-size:24px;
+        margin-bottom:0.4em;
+      }
+      @media (max-width:200px){
+          #articleGrid a{min-width:0px;width:100%;}
+      }
+      .article{
+        width:30em;
+        margin:0px 14%;
+        margin: 0px calc((100% - 30em)/2);
+        text-align:right;
+        font-family:'Alef Hebrew','Alef',Alef,FrankRuehl,Georgia,serif;
+        font-size:20px;
+      }
+      .article img{
+          width:100%;
+          height:auto;
+      }
+      .article p{margin:0;}
+      .article p+p{text-indent:1em;}
+      blockquote{
+        color:#555;
+        margin:0;
+	    hanging-punctuation: first; 
+	    text-indent: -0.5em;
+      }
+      blockquote:before{content:"„";}
+      blockquote:after{content:"”";}
+      ul, ol {margin: 0; padding: 0;}
+      .articleBack{
+        text-align:center;
+        background-color:#000;
+        color:#fff !important;
+        padding:10px;
+        margin-top:25px;
+      }
+      .articleBack:hover, .articleBack:focus{
+        background-color:white;
+        color:blue !important;
+      }
+      @media (min-width:1500px){
+        .article{
+          font-size:calc(100vw/60);
+        }
+      }
+      @media (max-width:400px){
+        h1{
+          font-size:24px;
+        }
+        .author{
+          font-size:18px;
+        }
+        .article{
+          font-size:16px;
+        }
+      }
+      @media (min-width:700px){
+        h1{
+          font-size:48px;
+        }
+        .author{
+          font-size:36px;
+        }
+      }
+      @media print{
+        .articleBack{
+          display:none !important;
+        }
+      }
+      @media (max-width:61em){
+        .article{
+          width:auto;
+          margin:0px 14%;
+        }
+      }
+      .blockLevelLink{
+        color:inherit;
+        text-decoration: none;
+        display:block;
+      }
+    </style>
+    <script>
+      "use strict";
+      var getLuminance = function(color){
+        //from here: https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
+        var weirdColorThing = color.map(function(c){
+          var sRGB = c/255;
+          return (sRGB <= 0.03928)?sRGB/12.92:Math.pow((sRGB+0.055)/1.055, 2.4);
+        });
+        return 0.2126 * weirdColorThing[0] + 0.7152 * weirdColorThing[1] + 0.0722 * weirdColorThing[2];
+      };
+      var getContrastRatio = function(color1, color2){
+        //from here: https://www.w3.org/TR/2008/REC-WCAG20-20081211/#contrast-ratiodef
+        var l1 = getLuminance(color1);
+        var l2 = getLuminance(color2);
+        return (Math.max(l1,l2)+0.05)/(Math.min(l1,l2)+0.05)
+      };
+      var whiteOrBlack = function(color){
+        if(getContrastRatio(color,[0,0,0])>getContrastRatio(color,[255,255,255])){
+          return 'Black';
+        }else{
+          return 'White';
+        }
+      };
+    </script>
+<script>
+    "use strict";
+      var untabEverything = function(root,reverse){
+        var elements = root.querySelectorAll('*');
+        var i = elements.length;
+        var val = (typeof(reverse)==='undefined')?(-1):0;
+        if(val===-1){document.activeElement.blur();}
+        while(i-- > 0){
+          if(typeof(elements[i].getAttribute('tabindex'))==='string'){elements[i].setAttribute('tabindex',val);}
+        }
+      };
+      var drawNewspaperChoice = function(){
+        untabEverything(document);
+        var newspaperChoice = document.getElementById('newspaperChoice');
+        if(newspaperChoice.classList.contains('newspaperChoice-clean')){
+          var div = document.getElementById('newspaperList');
+          var i = newspaperdata.length;
+          while(i-- > 0){
+            var a = document.createElement('a');
+            a.classList.add('blockLevelLink');
+            a.setAttribute('href','#newpaper:'+i);
+            a.setAttribute('tabIndex','0');
+            a.appendChild(document.createTextNode(newspaperdata[i].name +' ( '+newspaperdata[i].date+' )'));
+            div.appendChild(a);
+          }
+          newspaperChoice.classList.remove('newspaperChoice-clean');
+        }
+        newspaperChoice.classList.remove('off-screen-high');
+        newspaperChoice.setAttribute('aria-hidden','false');
+        document.getElementById('articleChoice').classList.add('off-screen-low');
+        document.getElementById('articleChoice').setAttribute('aria-hidden','true');
+        document.getElementById('articleDisplay').classList.add('off-screen-low');
+        document.getElementById('articleDisplay').setAttribute('aria-hidden','true');
+        untabEverything(newspaperChoice,'reverse');
+        document.getElementsByTagName('title')[0].textContent = theGoddamnName;
+        window.location.hash='';
+        document.getElementById('jsonld').textContent = JSON.stringify({'@context': 'http://schema.org', '@type': 'WebSite', 'name':newspaperdata[i], 'description':'ירחון הנכתב ע"י תלמידים מחוננים עבור תלמידים מחוננים במטרה לשפר את זרימת הרעיונות.'});
+      };
+      var drawArticleChoice = function(i){
+        untabEverything(document);
+        var articleChoice = document.getElementById('articleChoice');
+        if(articleChoice.getAttribute('data-newspaper')!==i.toString()){
+          var newspaper = newspaperdata[i];
+          articleChoice.getElementsByTagName('h1')[0].textContent = newspaper.name;
+          var grid = articleChoice.getElementsByTagName('div')[0];
+          grid.innerHTML = '<a class="gridItem gridBackButton blockLevelLink" href="#" tabindex="0">חזור</a>';
+          var j = newspaper.articles.length;
+          while(j-- > 0){
+            var gridItem = document.createElement('a');
+            var span = document.createElement('span');
+            var desc = document.createElement('p');
+            gridItem.classList.add('blockLevelLink');
+            gridItem.setAttribute('tabIndex',0);
+            gridItem.setAttribute('href','#newspaper:'+i+';article:'+j);
+            span.appendChild(document.createTextNode(newspaper.articles[j].title + ' / ' + newspaper.articles[j].author));
+            desc.appendChild(document.createTextNode(newspaper.articles[j].sample));
+            gridItem.appendChild(span);
+            gridItem.appendChild(desc);
+            gridItem.classList.add('gridItem');
+            gridItem.style.backgroundColor = 'rgb('+newspaper.articles[j].color[0]+', '+newspaper.articles[j].color[1]+', '+newspaper.articles[j].color[2]+')';
+            gridItem.style.color = whiteOrBlack(newspaper.articles[j].color);
+            grid.appendChild(gridItem);
+          }
+          articleChoice.setAttribute('data-newspaper',i.toString());
+        }
+        document.getElementsByTagName('title')[0].textContent = newspaperdata[i].name + ' | '+theGoddamnName;
+        articleChoice.classList.remove('off-screen-high');
+        articleChoice.classList.remove('off-screen-low');
+        articleChoice.setAttribute('aria-hidden','false');
+        document.getElementById('newspaperChoice').classList.add('off-screen-high');
+        document.getElementById('newspaperChoice').setAttribute('aria-hidden','true');
+        document.getElementById('articleDisplay').classList.add('off-screen-low');
+        document.getElementById('articleDisplay').setAttribute('aria-hidden','true');
+        untabEverything(articleChoice,'revrse');
+        window.location.hash='newspaper:'+i;
+        document.getElementById('jsonld').textContent = JSON.stringify({'@context': 'http://schema.org', '@type': 'WebSite'});
+      };
+      var drawArticle = function(i,j){
+        untabEverything(document);
+        var article = newspaperdata[i].articles[j];
+        var articleDisplay = document.getElementById('articleDisplay');
+        articleDisplay.scrollTop = 0;
+        articleDisplay.getElementsByTagName('h1')[0].innerHTML = article.title;
+        document.getElementsByTagName('title')[0].textContent = article.title + ' | '+theGoddamnName;
+        articleDisplay.getElementsByTagName('div')[0].innerHTML = article.author;
+        articleDisplay.getElementsByTagName('div')[0].setAttribute('aria-label','נכתב על ידי '+article.author);
+        articleDisplay.getElementsByTagName('article')[0].innerHTML = article.content;
+        articleDisplay.getElementsByClassName('articleBack')[0].setAttribute('tabindex','0');
+        articleDisplay.getElementsByClassName('articleBack')[0].setAttribute('href','#newspaper:'+i);
+        articleDisplay.classList.remove('off-screen-low');
+        articleDisplay.setAttribute('aria-hidden','false');
+        document.getElementById('newspaperChoice').classList.add('off-screen-high');
+        document.getElementById('newspaperChoice').setAttribute('aria-hidden','true');
+        document.getElementById('articleChoice').classList.add('off-screen-high');
+        document.getElementById('articleChoice').setAttribute('aria-hidden','true');
+        untabEverything(articleDisplay,'reverse');
+        window.location.hash='newspaper:'+i+';article:'+j;
+        document.getElementById('jsonld').textContent = JSON.stringify({'@context': 'http://schema.org', '@type': 'Article', 'author':{'@type':'Person','name':article.author}, 'headline':article.title, 'articleBody':article.content, 'description':article.sample});
+      };
+    </script>
+    <script>
+      "use strict";
+      document.addEventListener("DOMContentLoaded", callRenderFunction);
+      window.addEventListener("hashchange", callRenderFunction);
+    </script>
+    <style>
+    .BIGREDBUTTON{display:none;}
+      @media screen and (min-width: 725px) and (min-height: 300px){
+        .BIGREDBUTTON{
+            display: block;
+            position: fixed;
+            background-image: url("./BIGREDBUTTON.png");
+            width:100px;
+            height:100px;
+            right:0px;
+            top:80px;
+        }
+        .BIGREDBUTTON:active{
+              background-position: 0px -100px;
+        }
+      }
+    </style>
+  </head>
+  <body lang="he" dir="rtl">
+    <noscript style="z-index:10;background-color:#fff;">האתר דורש ג'אואסקריפט כדי לעבוד, אנא אפשרו הרצת תסריטים בדפדפניכם או קורא המסך שלכם כדי להשתמש באתר.</noscript>
+    <div class="container">
+      <div class="view newspaperChoice-clean off-screen-high" id="newspaperChoice">
+        <h1>הָטְרָפֶּזִי</h1>
+        <div id="newspaperList"></div>
+      </div>
+      <div class="view msnry-clean" id="articleChoice" data-newspaper="none">
+        <h1></h1>
+        <div id="articleGrid"></div>
+      </div>
+      <div class="view" id="articleDisplay">
+        <h1 id="articleHeader"></h1>
+        <div class="author" title="מחבר"></div>
+        <article class="article" aria-labelledby="articleHeader"></article>
+        <a class="articleBack blockLevelLink" tabindex="-1">חזור</a>
+      </div>
+    </div>
+    <div class="BIGREDBUTTON"></div>
+  </body>
+</html>
