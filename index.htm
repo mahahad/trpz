@@ -121,7 +121,7 @@
       }
       #newspaperList a:hover, #newspaperList a:focus{
         background-color:white;
-        color:blue;
+        color:black;
       }
       #articleGrid{
           display:flex;
@@ -134,7 +134,8 @@
       }
       #articleGrid a:hover, #articleGrid a:focus{
         background-color:white !important;
-        color:blue !important;
+        color:black !important;
+        background-image:none;
       }
       #articleGrid a p{
         font-family:'Alef Hebrew','Alef',Alef,Georgia,David,serif;
@@ -198,9 +199,15 @@
         padding:10px;
         margin-top:25px;
       }
+      .articleBack, .gridBackButton {
+          background-image: url("back.png");
+          background-size: contain;
+          background-repeat: repeat no-repeat;
+      }
       .articleBack:hover, .articleBack:focus{
         background-color:white;
-        color:blue !important;
+        color:black !important;
+        background-image: none;
       }
       @media (min-width:1500px){
         .article{
@@ -374,7 +381,7 @@
     </script>
     <style>
     .BIGREDBUTTON{display:none;}
-      @media screen and (min-width: 725px) and (min-height: 300px){
+      @media screen and (min-width: 750px) and (min-height: 300px){
         .BIGREDBUTTON{
             display: block;
             position: fixed;
